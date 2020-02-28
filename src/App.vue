@@ -10,6 +10,6 @@
 
 <style lang="scss">
 #app {
- 
+  background: #fff;
 }
 </style>
