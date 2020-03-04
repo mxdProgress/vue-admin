@@ -63,10 +63,10 @@ module.exports = {
         hotOnly: false,
         proxy: {
             '/devApi': {
-                target: "http://www.web-jshtml.cn/productapi/token", //API服务器的地址  http://www.web-jshtml.cn/api
+                target: "http://www.web-jshtml.cn", //API服务器的地址  http://www.web-jshtml.cn/api
                 changeOrigin: true,
                 pathRewrite: {
-                    '^/devApi': ''
+                    '^/devApi': 'productapi'
                 }
             }
         },

@@ -21,13 +21,13 @@
                     <el-form-item prop="code"  class="itemClass">
                         <label>验证码</label>
                         <el-row :gutter="11">
-                            <el-col :span="15"><el-input v-model.number="ruleForm.code"></el-input></el-col>
-                            <el-col :span="9"><el-button type="success" size="mini">获取验证码</el-button></el-col>
+                            <el-col :span="15"><el-input v-model="ruleForm.code"></el-input></el-col>
+                            <el-col :span="9"><el-button type="success" size="mini" @click='getSms()' :disabled='getSmsDisabled' style="width:100%">{{getSmsCode}}</el-button></el-col>
                         </el-row>
                         
                     </el-form-item>
                     <el-form-item class="itemClass" style="text-align:left;margin-top:20px;" >
-                        <el-button type="primary" @click="submitForm('ruleForm')" class="block">提交</el-button>
+                        <el-button type="primary" @click="submitForm('ruleForm')" :disabled="loginStatus" class="block">{{modules==='login'?"提交":"注册"}}</el-button>
                         <!-- <el-button @click="resetForm('ruleForm')" class="block">重置</el-button> -->
                     </el-form-item>
                 </el-form>
@@ -36,12 +36,13 @@
     </div>
 </template>
 <script>
+import {GetSms,Register,Login} from '@/api/login';
+import {reactive,ref, onMounted} from  '@vue/composition-api';
 import { stripscript, validatePass, validateEmail, validateVCode } from '@/utils/validate';
 export default {
     name:'Login',
-    data(){
-        
-        var checkUseName = (rule, value, callback) => {
+    setup(props,{refs,root}){
+        let checkUseName = (rule, value, callback) => {
             if (value === '') {
                 callback(new Error('请输入用户名'));
             } else if(validateEmail(value)){
@@ -50,10 +51,10 @@ export default {
                 callback(); //true
             }
         };
-        var checkPassWord = (rule, value, callback) => {
+        let checkPassWord = (rule, value, callback) => {
             // 过滤后的数据
-            this.ruleForm.password = stripscript(value);
-            value = this.ruleForm.password;
+            ruleForm.password = stripscript(value);
+            value = ruleForm.password;
             if (value === '') {
                 callback(new Error("请输入密码"));
             } else if (validatePass(value)) {
@@ -62,19 +63,19 @@ export default {
                 callback();
             }
         };
-        var checkPassWords = (rule, value, callback) => {
-            this.ruleForm.passwords = stripscript(value);
-            value = this.ruleForm.passwords;
+        let checkPassWords = (rule, value, callback) => {
+            ruleForm.passwords = stripscript(value);
+            value = ruleForm.passwords;
             if (value === '') {
                 callback(new Error("请再次输入密码"));
-            } else if (value != this.ruleForm.password) {
+            } else if (value != ruleForm.password) {
                 callback(new Error("重复密码不正确"));
             } else {
                 callback();
             }
         };
 
-        var checkCode = (rule, value, callback) => {
+        let checkCode = (rule, value, callback) => {
            if (value === '') {
                 return callback(new Error('请输入验证码'));
             }else if(validateVCode(value)){
@@ -83,15 +84,13 @@ export default {
                 callback();
             }
         };
-        return {
-            modules:'login',
-            ruleForm: {
+        const ruleForm=reactive({
             useName: '',
             password: '',
             passwords: '',
             code: ''
-        },
-        rules: {
+        })
+        const rules=reactive({
             useName: [
                 { validator: checkUseName, trigger: 'blur' }
             ],
@@ -104,35 +103,141 @@ export default {
             code: [
                 { validator: checkCode, trigger: 'blur' }
             ]
-            },
-            menuTab:[
-                {txt:"登录",current:true,type:'login'},
-                {txt:"注册",current:false,type:'register'}
-            ]    
-        }
-    },
-    methods:{
-        toggleMenu(data){
-            this.menuTab.forEach((item)=>{
+        })
+        const menuTab =reactive([
+            {txt:"登录",current:true,type:'login'},
+            {txt:"注册",current:false,type:'register'}
+        ])
+        const modules = ref('login')
+        const loginStatus = ref(true)
+        const getSmsDisabled = ref(false)
+        const getSmsCode = ref('获取验证码')
+        const timer = ref(null)
+        
+        const toggleMenu = data => {
+            menuTab.forEach((item)=>{
                 item.current=false
             })
            data.current=true
-           this.modules = data.type
-        },
-        submitForm(formName) {
-            this.$refs[formName].validate((valid) => {
+           modules.value = data.type
+           refs['ruleForm'].resetFields();
+        }
+        const getSms=(()=>{
+            if(ruleForm.useName==''){
+               root.$message.error('请输入用户名');
+                return ;
+            }
+            getSmsDisabled.value = true
+            getSmsCode.value = '发送中'
+            setTimeout(function(){
+                GetSms({username:ruleForm.useName,module:modules.value}).then(response=>{
+                    console.log(response);
+                    let data = response.data;
+                    root.$message({
+                        message:data.message,
+                        type:'success'
+                    })
+                    loginStatus.value=false
+                    countTime(5)
+                    
+                }).catch(error=>{
+                    console.log(error);
+                });
+            },3000)
+        })
+        const submitForm = formName => {
+            refs[formName].validate((valid) => {
             if (valid) {
-                alert('submit!');
+                if(modules.value=='login'){
+                    login();
+                }else{
+                    register();
+                }
+                
             } else {
                 console.log('error submit!!');
                 return false;
             }
             });
-        },
-        // resetForm(formName) {
-        //     this.$refs[formName].resetFields();
-        // }
-    }
+        }
+
+        const countTime = (time)=>{
+            timer.value = setInterval(()=>{
+                time--
+                if(time == 0){
+                    clearInterval(timer.value)
+                    getSmsCode.value = '重新获取'
+                    getSmsDisabled.value = false
+                }else{
+                    getSmsCode.value = `倒计时${time}秒`
+                }
+               
+            },1000);
+        }
+
+        const clearCountDown=()=>{
+            getSmsDisabled.value = false
+            getSmsCode.value = '获取验证码'
+            clearInterval(timer.value)
+        }
+
+        const register = ()=>{
+            let requestData={
+                username:ruleForm.useName,
+                password:ruleForm.password,
+                code:ruleForm.code
+            }
+            Register(requestData).then(response=>{
+                console.log(response);
+                let data = response.data;
+                root.$message({
+                    message:data.message,
+                    type:'success'
+                })
+                toggleMenu(menuTab[0]);
+                clearCountDown()
+            }).catch(error=>{
+
+            });
+        }
+        const login = ()=>{
+            let requestData ={
+                username:ruleForm.useName,
+                password:ruleForm.password,
+                code:ruleForm.code
+            };
+            Login(requestData).then((response)=>{
+                let data = response.data;
+                root.$message({
+                    message:data.message,
+                    type:'success'
+                })
+            }).catch((error)=>{
+
+            });
+        }
+
+        onMounted(()=>{
+            
+        })
+
+        return {
+            ruleForm,
+            rules,
+            menuTab,
+            modules,
+            getSmsDisabled,
+            timer,
+            getSmsCode,
+            loginStatus,
+            toggleMenu,
+            submitForm,
+            getSms
+        }
+
+    },
+    
+
 }
 </script>
 <style lang="scss" scoped>
