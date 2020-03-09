@@ -36,29 +36,30 @@
     </div>
 </template>
 <script>
-import {GetSms,Register,Login} from '@/api/login';
-import {reactive,ref, onMounted} from  '@vue/composition-api';
-import { stripscript, validatePass, validateEmail, validateVCode } from '@/utils/validate';
+import sha1 from 'js-sha1'
+import {GetSms,Register,Login} from '@/api/login'
+import {reactive,ref, onMounted} from  '@vue/composition-api'
+import { stripscript, validatePass, validateEmail, validateVCode } from '@/utils/validate'
 export default {
     name:'Login',
     setup(props,{refs,root}){
         let checkUseName = (rule, value, callback) => {
             if (value === '') {
-                callback(new Error('请输入用户名'));
+                callback(new Error('请输入用户名'))
             } else if(validateEmail(value)){
-                callback(new Error('用户名格式有误'));
+                callback(new Error('用户名格式有误'))
             } else {
                 callback(); //true
             }
         };
         let checkPassWord = (rule, value, callback) => {
             // 过滤后的数据
-            ruleForm.password = stripscript(value);
-            value = ruleForm.password;
+            ruleForm.password = stripscript(value)
+            value = ruleForm.password
             if (value === '') {
-                callback(new Error("请输入密码"));
+                callback(new Error("请输入密码"))
             } else if (validatePass(value)) {
-                callback(new Error("密码为6至20位数字+字母"));
+                callback(new Error("密码为6至20位数字+字母"))
             } else {
                 callback();
             }
@@ -67,9 +68,9 @@ export default {
             ruleForm.passwords = stripscript(value);
             value = ruleForm.passwords;
             if (value === '') {
-                callback(new Error("请再次输入密码"));
+                callback(new Error("请再次输入密码"))
             } else if (value != ruleForm.password) {
-                callback(new Error("重复密码不正确"));
+                callback(new Error("重复密码不正确"))
             } else {
                 callback();
             }
@@ -77,15 +78,15 @@ export default {
 
         let checkCode = (rule, value, callback) => {
            if (value === '') {
-                return callback(new Error('请输入验证码'));
+                return callback(new Error('请输入验证码'))
             }else if(validateVCode(value)){
-                return callback(new Error('验证码格式有误'));
+                return callback(new Error('验证码格式有误'))
             }else{
                 callback();
             }
         };
         const ruleForm=reactive({
-            useName: '',
+            useName: '821808134@qq.com',
             password: '',
             passwords: '',
             code: ''
@@ -109,7 +110,7 @@ export default {
             {txt:"注册",current:false,type:'register'}
         ])
         const modules = ref('login')
-        const loginStatus = ref(true)
+        const loginStatus = ref(false)
         const getSmsDisabled = ref(false)
         const getSmsCode = ref('获取验证码')
         const timer = ref(null)
@@ -124,38 +125,35 @@ export default {
         }
         const getSms=(()=>{
             if(ruleForm.useName==''){
-               root.$message.error('请输入用户名');
+               root.$message.error('请输入用户名')
                 return ;
             }
             getSmsDisabled.value = true
             getSmsCode.value = '发送中'
             setTimeout(function(){
                 GetSms({username:ruleForm.useName,module:modules.value}).then(response=>{
-                    console.log(response);
                     let data = response.data;
                     root.$message({
                         message:data.message,
                         type:'success'
                     })
                     loginStatus.value=false
-                    countTime(5)
+                    countTime(60)
                     
                 }).catch(error=>{
-                    console.log(error);
+                   clearCountDown()
                 });
             },3000)
         })
         const submitForm = formName => {
+             root.$router.push({
+                    name:'Console'
+                })
             refs[formName].validate((valid) => {
             if (valid) {
-                if(modules.value=='login'){
-                    login();
-                }else{
-                    register();
-                }
-                
+                modules.value=='login'? login():register()
             } else {
-                console.log('error submit!!');
+                console.log('error submit!!')
                 return false;
             }
             });
@@ -184,12 +182,11 @@ export default {
         const register = ()=>{
             let requestData={
                 username:ruleForm.useName,
-                password:ruleForm.password,
+                password:sha1(ruleForm.password),
                 code:ruleForm.code
             }
             Register(requestData).then(response=>{
-                console.log(response);
-                let data = response.data;
+                let data = response.data
                 root.$message({
                     message:data.message,
                     type:'success'
@@ -203,14 +200,17 @@ export default {
         const login = ()=>{
             let requestData ={
                 username:ruleForm.useName,
-                password:ruleForm.password,
+                password:sha1(ruleForm.password),
                 code:ruleForm.code
             };
             Login(requestData).then((response)=>{
-                let data = response.data;
+                let data = response.data
                 root.$message({
                     message:data.message,
                     type:'success'
+                })
+                root.$router.push({
+                    name:'Index'
                 })
             }).catch((error)=>{
 
