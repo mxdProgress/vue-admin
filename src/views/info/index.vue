@@ -8,10 +8,10 @@
                     <div class="wrap-content">
                         <el-select v-model="values" placeholder="请选择" size="small">
                             <el-option
-                            v-for="item in options"
+                            v-for="item in options.item"
                             :key="item.value"
-                            :label="item.label"
-                            :value="item.value">
+                            :label="item.category_name"
+                            :value="item.id">
                             </el-option>
                         </el-select>
                     </div>
@@ -96,9 +96,11 @@
     </div>
 </template>
 <script>
-    import {ref,reactive} from "@vue/composition-api"
+    import {ref,reactive, onMounted,watch } from "@vue/composition-api"
     import dialog from "./components/dialog"
     import {global} from "@/utils/global_v3.0"
+    import {common} from "@/api/common"
+    import {setCategory} from "@/api/new"
     export default {
         name: 'infoList',
         components:{
@@ -106,22 +108,11 @@
         },
         setup(props,{root}) {
             const {confirm} = global();
-            const options =reactive([{
-                        value: '选项1',
-                        label: '黄金糕'
-                    }, {
-                        value: '选项2',
-                        label: '双皮奶'
-                    }, {
-                        value: '选项3',
-                        label: '蚵仔煎'
-                    }, {
-                        value: '选项4',
-                        label: '龙须面'
-                    }, {
-                        value: '选项5',
-                        label: '北京烤鸭'
-                    }])
+            const {categoryItem,getInfoCategory} = common();
+            const options =reactive({ 
+                item:[]
+            })
+            console.log(options)
             const keysID = reactive([
                 {
                     value: 'id',
@@ -192,6 +183,22 @@
             }
             const confirmFunSimple = ()=>{
             }
+
+            onMounted(()=>{
+                getInfoCategory()
+                //获取类别接口临时增加模拟数据用，没有实际界面操作
+                // setCategory({categoryName:"CCTV3"})
+            })
+
+            watch(()=>categoryItem.item,value=>{
+                console.log(value);
+                options.item=value
+            })
+
+          
+
+
+
            
             return {
                 options,
