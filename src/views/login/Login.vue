@@ -87,7 +87,7 @@ export default {
         };
         const ruleForm=reactive({
             useName: '821808134@qq.com',
-            password: '',
+            password: 'mzd123',
             passwords: '',
             code: ''
         })
@@ -146,9 +146,9 @@ export default {
             },3000)
         })
         const submitForm = formName => {
-             root.$router.push({
-                    name:'Console'
-                })
+            //  root.$router.push({
+            //         name:'Console'
+            //     })
             refs[formName].validate((valid) => {
             if (valid) {
                 modules.value=='login'? login():register()
@@ -200,11 +200,26 @@ export default {
         const login = ()=>{
             let requestData ={
                 username:ruleForm.useName,
-                password:sha1(ruleForm.password),
+                // password:sha1(ruleForm.password),
+                password:ruleForm.password,
                 code:ruleForm.code
             };
-            Login(requestData).then((response)=>{
-                let data = response.data
+            // Login(requestData).then((response)=>{
+            //     let data = response.data
+            //     root.$message({
+            //         message:data.message,
+            //         type:'success'
+            //     })
+            //     root.$router.push({
+            //         name:'Index'
+            //     })
+            // }).catch((error)=>{
+
+            // });
+
+            root.$store.dispatch('app/login',requestData).then(res=>{
+                console.log(res)
+                let data = res.data
                 root.$message({
                     message:data.message,
                     type:'success'
@@ -212,9 +227,7 @@ export default {
                 root.$router.push({
                     name:'Index'
                 })
-            }).catch((error)=>{
-
-            });
+            }).catch(err=>{})
         }
 
         onMounted(()=>{

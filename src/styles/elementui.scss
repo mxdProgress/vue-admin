@@ -10,3 +10,17 @@
 .el-submenu.is-active.is-opened .el-submenu__title {
     background-color: $mainColor;
 }
+
+.el-menu {
+    border: none;
+}
+
+.el-date-editor--datetimerange.el-input,
+.el-date-editor--datetimerange.el-input__inner {
+    width: 100% !important;
+}
+
+.el-row::after,
+.el-row::before {
+    display: none !important;
+}

@@ -18,13 +18,14 @@
     </div>
 </template>
 <script>
-import {reactive,ref, onMounted} from  '@vue/composition-api'
+import {reactive,ref, onMounted,computed} from  '@vue/composition-api'
     export default {
         name: 'navMenu',
         setup(props,{root}) {
-            const isCollapse = ref(false);
-            const routers=reactive( root.$router.options.routes)
-            // console.log(routers)
+            const isCollapse = computed(()=>root.$store.state.app.isCollapse);
+            const routers=reactive( root.$router.options.routes )
+            // console.log(root.$store.getters.counts)
+            // root.$store.commit('SET_COUNT',100);
             return {
                 isCollapse,
                 routers
@@ -33,7 +34,7 @@ import {reactive,ref, onMounted} from  '@vue/composition-api'
     }
 </script>
 <style lang="scss" scoped>
-    .navWrap{
-       
+    .console,.infomanage,.user{
+        margin-right: 10px;
     }
 </style>
