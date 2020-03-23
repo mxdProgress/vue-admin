@@ -14,3 +14,11 @@ export function setCategory(data) {
         data: data
     });
 }
+
+export function addInfo(data) {
+    return sevice.request({
+        method: 'post',
+        url: "/news/add/",
+        data: data
+    })
+}

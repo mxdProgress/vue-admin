@@ -92,7 +92,7 @@
                 </el-pagination>
             </el-col>
         </el-row>
-        <dialog-from :flag="dialogAdd" @close="close"></dialog-from>
+        <dialog-from :flag="dialogAdd" @close="close" :category="options.item"></dialog-from>
     </div>
 </template>
 <script>
@@ -191,13 +191,9 @@
             })
 
             watch(()=>categoryItem.item,value=>{
-                console.log(value);
+                // console.log(value);
                 options.item=value
             })
-
-          
-
-
 
            
             return {
