@@ -68,6 +68,16 @@ const routes = [{
                 },
                 component: () =>
                     import ("../views/info/category"),
+            },
+            {
+                path: '/editDetailed/:id/:title',
+                name: 'editDetailed',
+                hidden: true,
+                meta: {
+                    txt: '编辑详情'
+                },
+                component: () =>
+                    import ("../views/info/editDetailed"),
             }
         ]
     },

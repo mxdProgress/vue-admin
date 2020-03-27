@@ -1,16 +1,16 @@
 <template>
-    <div>
-        <el-dialog title="新增" :visible.sync="dialogFormVisible"  @close="close" @open="openFunOptions" width="500px">
+    <div class="dialogAddForm">
+        <el-dialog :title="title" :visible.sync="dialogFormVisible"  @close="close" @open="openFunOptions" width="500px">
             <el-form :model="form" ref="ruleForm" >
-                <el-form-item label="类别：" >
+                <el-form-item label="类别：" prop="category">
                     <el-select v-model="form.category" placeholder="请选择类别">
                         <el-option v-for="item in categoryOptions.options" :key="item.id"  :label="item.category_name" :value="item.id"></el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="标题：">
+                <el-form-item label="标题：" prop="title">
                     <el-input v-model="form.title"></el-input>
                 </el-form-item>
-                <el-form-item label="概况：">
+                <el-form-item label="概况："  prop="content">
                     <el-input type="textarea" v-model="form.content"></el-input>
                 </el-form-item>
             </el-form>
@@ -23,7 +23,7 @@
 </template>
 <script>
 import {addInfo} from "@/api/new"
-import {ref,reactive,watch} from "@vue/composition-api"
+import {ref,reactive,watch, onMounted} from "@vue/composition-api"
 export default {
     name:'infoDialog',
     props:{
@@ -34,12 +34,41 @@ export default {
         category:{
             type:Array,
             default:()=>[]
+        },
+        editDatas:{
+            type:Object,
+            default: ()=>{}
+        },
+        addOrEdit:{
+            type:String,
+            default:''
         }
     },
-    setup(props,{root,emit}){
+    setup(props,{root,emit,refs}){
         const dialogFormVisible =ref(false)
         const loadingStatus = ref(false)
-        watch(()=>dialogFormVisible.value = props.flag)
+        const title = ref('')
+        
+        watch(()=>[props.flag,props.editDatas,props.addOrEdit],([value,value2,value3])=>{
+            dialogFormVisible.value = props.flag
+            if(value3=='新增'){
+                form.title = ""
+                form.category=""
+                 form.content=""
+                 title.value='新增'
+            }else{
+                title.value='编辑'
+                if(value2.title){
+                    form.title = value2.title
+                }
+                if(value2.categoryId){
+                    form.category = value2.categoryId
+                }
+                if(value2.content){
+                    form.content = value2.content
+                }
+            }
+        })
         const close=()=>{
             dialogFormVisible.value = false
             emit('close',false)
@@ -51,18 +80,16 @@ export default {
           content:''
         })
         const resetForm = ()=>{
-            form.title =''
-            form.category =''
-            form.content =''
+            refs['ruleForm'].resetFields();
+            form.title = ""
+            form.category=""
+            form.content=""
         }
         const categoryOptions=reactive({
             options:[]
         })
-
         const openFunOptions = ()=>{
             categoryOptions.options = props.category
-            console.log(categoryOptions.options)
-
         }
         const addInfoFun = ()=>{
 
@@ -70,7 +97,7 @@ export default {
             // categoryId: 分类ID（string）
             // title: 标题（string）
             // content: 内容（string）
-            // imgUrl: 缩略图（string）第22-1学时新增
+            // imgUrl: 缩略图（string）
 
             let requestDta = {
                 category:form.category,
@@ -79,15 +106,13 @@ export default {
             }
             loadingStatus.value = true
             addInfo(requestDta).then((res)=>{
-                console.log(res)
-
                 root.$message({
                     message: res.data.message,
                     type: 'success'
                 });
                 loadingStatus.value = false
                 resetForm();
-                // root.$refs['ruleForm'].resetFields();
+                emit('getList')
                 // dialogFormVisible.value = false
             }).catch(err=>{
                  loadingStatus.value = false
@@ -102,7 +127,8 @@ export default {
             categoryOptions,
             openFunOptions,
             addInfoFun,
-            loadingStatus
+            loadingStatus,
+            title
         }
     }
 }

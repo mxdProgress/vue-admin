@@ -1,7 +1,6 @@
 <template>
     <div>
         <div class="navWrap">
-
             <el-menu default-active="1-4-1" class="el-menu-vertical-demo"background-color="transparent" text-color="#fff" :collapse="isCollapse" router>
                 <template  v-for="(item,index) in routers">
                     <el-submenu index="1" v-if="!item.hidden" :key="item.id"  :index="index+''">
@@ -10,7 +9,9 @@
                             <svg-icon :iconClass="item.meta.icon" :className="item.meta.icon" />
                             <span slot="title">{{item.meta.txt}}</span>
                         </template>
-                        <el-menu-item v-for="(subItem, index) in item.children" :key="subItem.id" :index="subItem.path" >{{subItem.meta.txt}}</el-menu-item>
+                        <template v-for="(subItem, index) in item.children">
+                            <el-menu-item  v-if="!subItem.hidden" :key="subItem.id" :index="subItem.path" >{{subItem.meta.txt}}</el-menu-item>
+                        </template>
                     </el-submenu>
                 </template>
             </el-menu>

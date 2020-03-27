@@ -25,6 +25,19 @@
     display: none !important;
 }
 
-.el-form-item__content {
+.dialogAddForm .el-form-item__content {
     margin-left: 55px !important;
+}
+
+.el-menu--popup-right-start li {
+    background-color: #344a5f !important;
+}
+
+.el-menu--popup-right-start li :hover {
+    background-color: #f56c6c !important;
+}
+
+.el-menu--popup-right-start li.is-active {
+    background-color: #f38888 !important;
+    color: #fff;
 }

@@ -22,3 +22,18 @@ export function addInfo(data) {
         data: data
     })
 }
+export function getList(data) {
+    return sevice.request({
+        method: 'post',
+        url: '/news/getList/',
+        data: data
+    })
+}
+
+export function delateItem(data) {
+    return sevice.request({
+        method: 'post',
+        url: '/news/deleteInfo/',
+        data: data
+    })
+}

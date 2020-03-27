@@ -1,3 +1,13 @@
 @import './config.scss';
 @import './normalize.scss';
 @import './elementui.scss';
+.form-wrap {
+    overflow: hidden;
+    label {
+        float: left;
+        line-height: 30px;
+    }
+    .wrap-content {
+        margin-left: 50px;
+    }
+}
