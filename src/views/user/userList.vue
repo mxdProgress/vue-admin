@@ -114,7 +114,15 @@
                             columnType:'slot',
                             slotsName:'operation'
                         }
-                    ]
+                    ],
+                    requestDatas:{
+                        url:'getUserList',
+                        method:'POST',
+                        data:{
+                            pageNumber: 1,
+                            pageSize:10
+                        }
+                    }
                 }
             })
 

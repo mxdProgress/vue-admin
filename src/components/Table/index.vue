@@ -21,6 +21,8 @@
 </template>
 <script>
 import {ref,reactive, onMounted, onBeforeMount } from "@vue/composition-api"
+import requestListUrl from "@/api/requestUrl"
+import {loadTableData} from "@/api/common"
 export default {
     name:'tableVue',
     props:{
@@ -56,14 +58,34 @@ export default {
             }],
             configTable:{
                 tHead:[],
-                selection:true
+                selection:true,
+                requestDatas:{}
             }
         })
 
-        const initOptionsFun=()=>{
+
+        let loadData=()=>{
+            let request ={
+                url:requestListUrl[data.configTable.requestDatas.url],
+                method:data.configTable.requestDatas.method,
+                data:data.configTable.requestDatas.data
+            }
+            loadTableData(request).then(res=>{
+
+            }).catch(err=>{
+
+            })
+
+
+
+
+        }
+
+        let initOptionsFun=()=>{
             let tableConfig = props.config
+            let KeyArr = Object.keys(tableConfig)
             for(let key in tableConfig){
-                if(data.configTable[key]){
+                if(KeyArr.includes(key)){    //["selection", "tHead", "requestUrl"].includes(selection)  includes方法用来判断一个数组是否包含一个指定的值
                     data.configTable[key] = tableConfig[key]
                 }
             }
@@ -71,13 +93,14 @@ export default {
 
         onBeforeMount(()=>{
             initOptionsFun()
+            loadData()
+            //传统props传值写法
             // data.configTable.tHead=props.config.tHead
             // data.configTable.selection=props.config.selection
         })
         
         return {
             data
-            
         }
     }
 
