@@ -37,7 +37,7 @@
         </table-vue>
         <div class="heightDiv" ></div>
 
-        <el-row>
+        <!-- <el-row>
             <el-col :span="24" style="text-align:right">
                 <el-pagination
                     background
@@ -50,7 +50,7 @@
                     :total="400">
                     </el-pagination>
             </el-col>
-        </el-row>
+        </el-row> -->
         
     </div>
 
@@ -69,17 +69,17 @@
             const data = reactive({
                 keyWords:'name',
                 switch:true,
-                currentPage4: 4,
                 item:[],
                 configOptions:{
                     init:["name","iphone"]
                 },
                 configTable:{
                     selection:true,
+                    size:"small",
                     tHead:[
                         {
                             label:'用户名/邮箱',
-                            field:'email',
+                            field:'title',
                             width:150
                         },
                         {
@@ -130,15 +130,10 @@
             /**
              * 方法
             */
-            const handleSizeChange=(val)=> {
-                console.log(`每页 ${val} 条`);
-            }
-            const handleCurrentChange=(val)=> {
-                console.log(`当前页: ${val}`);
-            }
+        
 
             return{
-                data,handleSizeChange,handleCurrentChange
+                data
             }
         }
     }

@@ -1,10 +1,8 @@
 <template>
     <div>
-        <el-table :data="data.tableData" border style="width: 100%">
+        <el-table :data="data.tableData" border style="width: 100%" :size="data.configTable.size">
             <!--全选-->
             <el-table-column v-if="data.configTable.selection" type="selection" width="40"></el-table-column>
-
-            
             <template v-for="item in data.configTable.tHead">
                 <!--v-slot-->
                 <el-table-column :width="item.width" :key="item.field" :prop="item.field" :label="item.label" v-if="item.columnType=='slot'">
@@ -15,14 +13,24 @@
                 <!--Tbale渲染头部数据-->
                 <el-table-column :width="item.width" :key="item.field" :prop="item.field" :label="item.label"  v-else></el-table-column>
             </template >
-            
         </el-table>
+
+        <el-pagination
+            background
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="pagiNationData.currentpage"
+            :page-sizes="pagiNationData.pagesizes"
+            :page-size="pagiNationData.pagesize"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="pagiNationData.total">
+        </el-pagination>
     </div>
 </template>
 <script>
-import {ref,reactive, onMounted, onBeforeMount } from "@vue/composition-api"
-import requestListUrl from "@/api/requestUrl"
-import {loadTableData} from "@/api/common"
+import {ref,reactive, onMounted, onBeforeMount,watch  } from "@vue/composition-api"
+import {loadTableDataFun} from "@/components/Table/tableLoadData"
+import { paginationHook } from "@/components/Table/paginationHook"
 export default {
     name:'tableVue',
     props:{
@@ -30,58 +38,49 @@ export default {
         default:()=>{}
     },
     setup(props, { root } ){
+        const {userManageListData,getloadTableData} = loadTableDataFun()
+        const { pagiNationData , pagiNationFun,handleSizeChange,handleCurrentChange}  = paginationHook()
         const data = reactive({
-            tableData: [{
-                email: '2016-05-02',
-                name: '张三',
-                phone:'18251422552',
-                address: '上海市普陀区金沙江路 1518 弄',
-                role:'查勘员'
-            }, {
-                email: '2016-05-02',
-                name: '李四',
-                phone:'18251422552',
-                address: '上海市普陀区金沙江路 1518 弄',
-                role:'协赔员'
-            }, {
-                email: '2016-05-02',
-                name: '曹八',
-                phone:'18251422552',
-                address: '上海市普陀区金沙江路 1518 弄',
-                role:'管理员'
-            }, {
-                email: '2016-05-02',
-                name: '王柳',
-                phone:'18251422552',
-                address: '上海市普陀区金沙江路 1518 弄',
-                role:'超级员'
-            }],
+            tableData: [],
+            total:0,
             configTable:{
                 tHead:[],
+                size:"",
                 selection:true,
                 requestDatas:{}
             }
         })
 
+        // watch(()=>userManageListData.item,(newValue,oldValue)=>{
+        //     data.tableData = newValue
+        // })
 
-        let loadData=()=>{
-            let request ={
-                url:requestListUrl[data.configTable.requestDatas.url],
-                method:data.configTable.requestDatas.method,
-                data:data.configTable.requestDatas.data
-            }
-            loadTableData(request).then(res=>{
+        watch([
+            ()=>userManageListData.item,
+            ()=>userManageListData.total
+        ],([
+            tableCount,totalCount
+        ])=>{
+            data.tableData = tableCount
+            pagiNationFun(totalCount)
+            console.log(totalCount)
+        })
 
-            }).catch(err=>{
+        //这种直接在组件中加载接口渲染数据会导致这个组件代码冗余严重，所以调接口逻辑要在其他页面完成
+        // const loadData=()=>{
+        //     let request ={
+        //         url:requestListUrl[data.configTable.requestDatas.url],
+        //         method:data.configTable.requestDatas.method,
+        //         data:data.configTable.requestDatas.data
+        //     }
+        //     loadTableData(request).then(res=>{
+        //         let resData = res.data.data.data
+        //         data.tableData=resData
+        //     }).catch(err=>{
+        //     })
+        // }
 
-            })
-
-
-
-
-        }
-
-        let initOptionsFun=()=>{
+        const initOptionsFun=()=>{
             let tableConfig = props.config
             let KeyArr = Object.keys(tableConfig)
             for(let key in tableConfig){
@@ -93,14 +92,18 @@ export default {
 
         onBeforeMount(()=>{
             initOptionsFun()
-            loadData()
+            getloadTableData(data.configTable)
+
+            // loadData()
             //传统props传值写法
             // data.configTable.tHead=props.config.tHead
             // data.configTable.selection=props.config.selection
         })
-        
+
+     
         return {
-            data
+            data,
+            pagiNationData ,handleSizeChange,handleCurrentChange
         }
     }
 
