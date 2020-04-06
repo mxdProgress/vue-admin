@@ -122,7 +122,9 @@
                             pageNumber: 1,
                             pageSize:10
                         }
-                    }
+                    },
+                    isShow:true,
+                    layout:"total, sizes, prev, pager, next, jumper"
                 }
             })
 

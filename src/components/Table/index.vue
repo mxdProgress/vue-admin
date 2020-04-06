@@ -17,12 +17,13 @@
 
         <el-pagination
             background
+            v-if="data.configTable.isShow"
             @size-change="handleSizeChange"
             @current-change="handleCurrentChange"
             :current-page="pagiNationData.currentpage"
             :page-sizes="pagiNationData.pagesizes"
             :page-size="pagiNationData.pagesize"
-            layout="total, sizes, prev, pager, next, jumper"
+            :layout="data.configTable.layout"
             :total="pagiNationData.total">
         </el-pagination>
     </div>
@@ -47,7 +48,9 @@ export default {
                 tHead:[],
                 size:"",
                 selection:true,
-                requestDatas:{}
+                requestDatas:{},
+                isShow:false,
+                layout:''
             }
         })
 
@@ -55,6 +58,9 @@ export default {
         //     data.tableData = newValue
         // })
 
+        /**
+         * 监听数据，总条数
+        */
         watch([
             ()=>userManageListData.item,
             ()=>userManageListData.total
@@ -63,7 +69,20 @@ export default {
         ])=>{
             data.tableData = tableCount
             pagiNationFun(totalCount)
-            console.log(totalCount)
+        })
+
+        /**
+         * 监听页码
+        */
+        watch([
+                ()=>pagiNationData.pagesize,
+                ()=>pagiNationData.currentpage
+            ],([pageSize,currentpage])=>{
+                if(data.configTable.requestDatas.data){
+                    data.configTable.requestDatas.data.pageSize=pageSize
+                    data.configTable.requestDatas.data.pageNumber=currentpage
+                    getloadTableData(data.configTable)
+                }
         })
 
         //这种直接在组件中加载接口渲染数据会导致这个组件代码冗余严重，所以调接口逻辑要在其他页面完成
