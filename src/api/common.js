@@ -27,3 +27,14 @@ export function loadTableData(params) {
         data: params.data || {}
     });
 }
+
+/**
+ * 加载省市县
+ */
+export function getCityPicker(params) {
+    return sevice.request({
+        method: "POST",
+        url: "/cityPicker/",
+        data: params
+    });
+}

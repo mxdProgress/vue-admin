@@ -21,7 +21,7 @@
                 </el-row>
             </el-col>
              <el-col :span="2">
-                 <el-button type="danger"  size="mini">添加用户</el-button>
+                 <el-button type="danger"  size="mini" @click="dialogAddFun('新增')">添加用户</el-button>
              </el-col>
         </el-row>
         <div class="" style="height:30px;"></div>
@@ -36,22 +36,8 @@
             </template>
         </table-vue>
         <div class="heightDiv" ></div>
-
-        <!-- <el-row>
-            <el-col :span="24" style="text-align:right">
-                <el-pagination
-                    background
-                    @size-change="handleSizeChange"
-                    @current-change="handleCurrentChange"
-                    :current-page="data.currentPage4"
-                    :page-sizes="[100, 200, 300, 400]"
-                    :page-size="100"
-                    layout="total, sizes, prev, pager, next, jumper"
-                    :total="400">
-                    </el-pagination>
-            </el-col>
-        </el-row> -->
-        
+        <dialogAdd :flag.sync="data.dialog_info" :addOredit="data.addOredit" :editDatas="data.editDataItem" @close="close"/>
+      
     </div>
 
 </template>
@@ -59,15 +45,20 @@
     import {ref,reactive, onMounted,watch } from "@vue/composition-api"
     import elSelects from "@/components/Select/index"
     import tableVue from "@/components/Table/index"
+    import dialogAdd from "./add"
     export default {
         name: 'uesrManage',
         components:{
             elSelects,
-            tableVue
+            tableVue,
+            dialogAdd
         },
         setup(props,{root}) {
             const data = reactive({
                 keyWords:'name',
+                dialog_info:false,
+                addOredit:'',
+                editDataItem:{},
                 switch:true,
                 item:[],
                 configOptions:{
@@ -132,10 +123,18 @@
             /**
              * 方法
             */
-        
-
+           const dialogAddFun=(flags,val)=>{
+               data.dialog_info=true
+               data.addOredit=flags
+               data.editDataItem = val
+           }
+           const close = ()=>{
+                data.dialog_info=false
+            }
             return{
-                data
+                data,
+                dialogAddFun,
+                close
             }
         }
     }
