@@ -2,28 +2,30 @@
     <div class="dialogAddForm">
         <el-dialog :title="title" :visible.sync="dialogFormVisible"  @close="close" @open="openFunOptions" width="500px">
             <el-form :model="data.form" ref="ruleForm" size="small">
-                <el-form-item label="用户："prop="title" >
-                    <el-input v-model="data.form.title" placeholder="请输入用户名"></el-input>
+                <el-form-item label="用户："prop="username" >
+                    <el-input v-model="data.form.username" placeholder="请输入邮箱"></el-input>
                 </el-form-item>
-                <el-form-item label="姓名：" prop="content">
-                    <el-input v-model="data.form.content"></el-input>
+                <el-form-item label="姓名：" prop="truename">
+                    <el-input v-model="data.form.truename" placeholder="请输入真实姓名"></el-input>
                 </el-form-item>
-                <el-form-item label="手机：" prop="iphone">
-                    <el-input type="number" v-model="data.form.iphone"></el-input>
+                <el-form-item label="密码：" prop="password">
+                    <el-input type="password" v-model="data.form.password" placeholder="请输入6~20数字+字母"></el-input>
                 </el-form-item>
-                <el-form-item label="地区：" prop="cityPiker">
-                    <cityPicker :cityPickerLevel="['province','city','area','street']" :cityPickerData.sync="data.form.cityPickerData" />
-                    {{data.form.cityPickerData}}
+                <el-form-item label="手机：" prop="phone">
+                    <el-input type="number" v-model="data.form.phone" placeholder="请输入手机号"></el-input>
                 </el-form-item>
-                <el-form-item label="启用：" prop="radio">
-                    <el-radio v-model="data.form.radio" label="1">禁用</el-radio>
-                    <el-radio v-model="data.form.radio" label="2">启用</el-radio>
+                <el-form-item label="地区：" prop="region">
+                    <cityPicker :cityPickerLevel="['province','city','area','street']" :cityPickerData.sync="data.cityPickerData" />
+                    {{data.cityPickerData}}
+                </el-form-item>
+                <el-form-item label="启用：" prop="status">
+                    <el-radio v-model="data.form.status" label="1">禁用</el-radio>
+                    <el-radio v-model="data.form.status" label="2">启用</el-radio>
                     </el-checkbox-group>
                 </el-form-item>
-                <el-form-item label="角色：" prop="checkListValue">
-                    <el-checkbox-group v-model="data.form.checkListValue">
-                        <el-checkbox v-for="item in data.form.checkList" :key="item.role" :label="item.name" ></el-checkbox>
-                       
+                <el-form-item label="角色：" prop="role">
+                    <el-checkbox-group v-model="data.form.role">
+                        <el-checkbox v-for="item in data.checkList" :key="item.role" :label="item.name" ></el-checkbox>
                     </el-checkbox-group>
                 </el-form-item>
                 <el-form-item>
@@ -35,7 +37,7 @@
     </div>
 </template>
 <script>
-import { getUserRole } from "@/api/user"
+import { getUserRole ,addUser} from "@/api/user"
 import { ref , reactive , watch , onMounted, onBeforeMount } from "@vue/composition-api"
 import cityPicker from "@/components/cityPicker/index"
 export default {
@@ -60,34 +62,39 @@ export default {
     setup(props,{ root , emit , refs }){
         const dialogFormVisible =ref(false)
         const loadingStatus = ref(false)
-        const title = ref('')
+        const title = ref()
 
         const data = reactive({
+            // username：用户名（string）*
+            // truename：真实姓名（string）
+            // password：密码（string）*
+            // phone：手机号（number）
+            // region：地区（json）
+            // status：禁启用状态（string）*
+            // role：角色类型（string）*
             form:{
-                title:'',
-                content:'',
-                checkListValue:['A'],
-                radio:"1",
-                iphone:null,
-                cityPickerData:{},
-                checkList:[]
-            }
+                username:'',
+                truename:'',
+                password:'',
+                role:[],
+                status:"1",
+                phone:'',
+                region:''
+            },
+            cityPickerData:{},
+            checkList:[]
         })
 
         const getRole=()=>{
             getUserRole({}).then(res=>{
-                console.log(res.data.data)
-                data.form.checkList=res.data.data
+                data.checkList=res.data.data
             }).catch(err=>{
 
             })
         }
 
-        onBeforeMount(()=>{
-            
-        })
+        onBeforeMount(()=>{})
 
-        
         
         watch(()=>[props.flag,props.editDatas,props.addOredit],([value,value2,value3])=>{
             dialogFormVisible.value = props.flag
@@ -117,6 +124,17 @@ export default {
         const openFunOptions = ()=>{
             getRole()
         }
+        const submitForm=()=>{
+            let requestData  = Object.assign({}, data.form);
+            requestData.role=requestData.role.join()
+            requestData.region=data.cityPickerData
+            addUser(requestData).then(res=>{
+                root.$message({
+                    message: res.data.message,
+                    type: "success"
+                })
+            }).catch(err=>{})
+        }
      
 
         return{
@@ -126,7 +144,8 @@ export default {
             loadingStatus,
             title,
             resetForm,
-            data
+            data,
+            submitForm
         }
     }
 }

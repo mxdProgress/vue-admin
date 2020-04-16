@@ -27,12 +27,12 @@
         <div class="" style="height:30px;"></div>
         <table-vue :config="data.configTable">
             <template v-slot:status="slotsData">
-                {{slotsData.data.name}}
-                <el-switch v-model="data.switch" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
+                <el-switch v-model="slotsData.data.status" active-value="2" inactive-value="1" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
+                <!-- {{slotsData.data.status}} -->
             </template>
             <template v-slot:operation="slotsData">
                  <el-button type="danger"  size="mini">删除</el-button>
-                 <el-button type="primary"  size="mini">编辑</el-button>
+                 <!-- <el-button type="primary"  size="mini">编辑</el-button> -->
             </template>
         </table-vue>
         <div class="heightDiv" ></div>
@@ -59,7 +59,6 @@
                 dialog_info:false,
                 addOredit:'',
                 editDataItem:{},
-                switch:true,
                 item:[],
                 configOptions:{
                     init:["name","iphone"]
@@ -69,13 +68,14 @@
                     size:"small",
                     tHead:[
                         {
-                            label:'用户名/邮箱',
-                            field:'title',
+                            label:'用户名',
+                            field:'username',
                             width:150
                         },
                         {
-                            label:'真实姓名',
-                            field:'name'
+                            label:'真是姓名',
+                            field:'truename',
+                            width:150
                         },
                         {
                             label:'手机号',
@@ -83,7 +83,7 @@
                         },
                         {
                             label:'地区',
-                            field:'address',
+                            field:'region',
                             width:250
                         },
                         {
@@ -92,9 +92,9 @@
                             width:100
                         },
                         {
-                            label:'启用禁用',
+                            label:'禁用状态',
                             field:'status',
-                            width:100,
+                            width:150,
                             columnType:'slot',
                             slotsName:'status'
                         },
@@ -107,7 +107,7 @@
                         }
                     ],
                     requestDatas:{
-                        url:'getUserList',
+                        url:'getList',
                         method:'POST',
                         data:{
                             pageNumber: 1,

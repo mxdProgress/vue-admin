@@ -7,3 +7,10 @@ export function getUserRole(data = {}) {
         data: data
     });
 }
+export function addUser(data = {}) {
+    return sevice.request({
+        method: "post",
+        url: "/user/add/",
+        data: data
+    });
+}

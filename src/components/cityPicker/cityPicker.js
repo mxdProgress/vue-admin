@@ -65,7 +65,6 @@ export function cityPickerFun() {
         resetVal({ type: "" })
     }
 
-
     /**
      * 重置选项
      */
@@ -78,18 +77,17 @@ export function cityPickerFun() {
 
         const arrObj = valueJson[param.type];
         if (arrObj) { arrObj.forEach(item => data[item] = '') }
-        resule()
+        result()
     }
 
     /**
      * 返回数据集合
      */
-    const resule = () => {
+    const result = () => {
         for (let key in resuleData) {
             resuleData[key] = data[key]
         }
     }
-
 
 
 
