@@ -1,6 +1,6 @@
 <template>
     <div>
-        <el-table :data="data.tableData" border style="width: 100%" :size="data.configTable.size">
+        <el-table :data="data.tableData" border style="width: 100%" :size="data.configTable.size" @select="thatTableAll">
             <!--全选-->
             <el-table-column v-if="data.configTable.selection" type="selection" width="40"></el-table-column>
             <template v-for="item in data.configTable.tHead">
@@ -15,17 +15,25 @@
             </template >
         </el-table>
 
-        <el-pagination
-            background
-            v-if="data.configTable.isShow"
-            @size-change="handleSizeChange"
-            @current-change="handleCurrentChange"
-            :current-page="pagiNationData.currentpage"
-            :page-sizes="pagiNationData.pagesizes"
-            :page-size="pagiNationData.pagesize"
-            :layout="data.configTable.layout"
-            :total="pagiNationData.total">
-        </el-pagination>
+        <div style="height:20px;"></div>
+        <el-row type="flex" justify="end">
+            <el-col :span="8">
+                <slot name="footerDeleteAllBtn"></slot> 
+            </el-col>
+            <el-col :span="16" style="text-align:right;">
+                <el-pagination
+                    background
+                    v-if="data.configTable.isShow"
+                    @size-change="handleSizeChange"
+                    @current-change="handleCurrentChange"
+                    :current-page="pagiNationData.currentpage"
+                    :page-sizes="pagiNationData.pagesizes"
+                    :page-size="pagiNationData.pagesize"
+                    :layout="data.configTable.layout"
+                    :total="pagiNationData.total">
+                </el-pagination>
+            </el-col>
+        </el-row>
     </div>
 </template>
 <script>
@@ -35,10 +43,16 @@ import { paginationHook } from "@/components/Table/paginationHook"
 export default {
     name:'tableVue',
     props:{
-        config:Object,
-        default:()=>{}
+        config:{
+            type:Object,
+            default:()=>{},
+        },
+        tableRow:{
+            type:Object,
+            default:()=>{}
+        }
     },
-    setup(props, { root } ){
+    setup(props, { root , emit } ){
         const {userManageListData,getloadTableData} = loadTableDataFun()
         const { pagiNationData , pagiNationFun,handleSizeChange,handleCurrentChange}  = paginationHook()
         const data = reactive({
@@ -116,13 +130,28 @@ export default {
             // loadData()
             //传统props传值写法
             // data.configTable.tHead=props.config.tHead
-            // data.configTable.selection=props.config.selection
+            // data.configTable.selection=props.config.selection 
         })
+
+        //checkbox选择按钮
+        const thatTableAll=(select)=>{
+            let rowData={
+                rowId:select.map(item=>item.id)
+            }
+            emit("update:tableRow",rowData)
+        }
+
+        //刷新方法
+        const queryTable=()=>{
+            getloadTableData(data.configTable)
+        }
 
      
         return {
             data,
-            pagiNationData ,handleSizeChange,handleCurrentChange
+            pagiNationData ,handleSizeChange,handleCurrentChange,
+            thatTableAll,
+            queryTable
         }
     }
 

@@ -14,3 +14,10 @@ export function addUser(data = {}) {
         data: data
     });
 }
+export function setDelete(data = {}) {
+    return sevice.request({
+        method: "post",
+        url: "/user/delete/",
+        data: data
+    });
+}

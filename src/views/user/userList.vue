@@ -25,14 +25,17 @@
              </el-col>
         </el-row>
         <div class="" style="height:30px;"></div>
-        <table-vue :config="data.configTable">
+        <table-vue ref="refreshFun" :config="data.configTable" :tableRow.sync="data.tableRow">
             <template v-slot:status="slotsData">
                 <el-switch v-model="slotsData.data.status" active-value="2" inactive-value="1" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
                 <!-- {{slotsData.data.status}} -->
             </template>
             <template v-slot:operation="slotsData">
-                 <el-button type="danger"  size="mini">删除</el-button>
+                 <el-button type="danger"  size="mini" @click="handledel(slotsData.data)">删除</el-button>
                  <!-- <el-button type="primary"  size="mini">编辑</el-button> -->
+            </template>
+            <template v-slot:footerDeleteAllBtn>
+                <el-button type="danger" size="mini" @click="handerDeleAll">批量删除</el-button>
             </template>
         </table-vue>
         <div class="heightDiv" ></div>
@@ -43,9 +46,11 @@
 </template>
 <script>
     import {ref,reactive, onMounted,watch } from "@vue/composition-api"
+    import {global} from "@/utils/global_v3.0" 
     import elSelects from "@/components/Select/index"
     import tableVue from "@/components/Table/index"
     import dialogAdd from "./add"
+    import {setDelete } from "@/api/user"
     export default {
         name: 'uesrManage',
         components:{
@@ -53,7 +58,8 @@
             tableVue,
             dialogAdd
         },
-        setup(props,{root}) {
+        setup(props,{root,refs}) {
+            const { confirm } = global();
             const data = reactive({
                 keyWords:'name',
                 dialog_info:false,
@@ -63,6 +69,7 @@
                 configOptions:{
                     init:["name","iphone"]
                 },
+                tableRow:{},   
                 configTable:{
                     selection:true,
                     size:"small",
@@ -128,13 +135,54 @@
                data.addOredit=flags
                data.editDataItem = val
            }
+
+           const handerDeleAll = ()=>{
+               let id = data.tableRow.rowId
+               if(!id || id.length==0){
+                   root.$message({
+                       type:'error',
+                       message:'请选择删除数据'
+                   })
+                   return false;
+               }
+               confirm({
+                    content:'此操作将批量删除数据, 是否继续?',
+                    tip:'警告',
+                    type:'info',
+                    fn:confirmHandle
+                })
+           }
+            //删除回调
+           const confirmHandle = () => {
+               setDelete({id:data.tableRow.rowId}).then(res=>{
+                    refs.refreshFun.queryTable()
+               }).catch(err=>{
+                   console.log(err)
+               })
+           }
+
+            //删除按钮
+           const handledel = (params) => {
+                data.tableRow.rowId=[params.id]
+                confirm({
+                    content:'此操作将删除数据, 是否继续?',
+                    tip:'警告',
+                    type:'info',
+                    fn:confirmHandle
+                })
+           }
+
+
+
            const close = ()=>{
                 data.dialog_info=false
             }
             return{
+                handledel,
+                handerDeleAll,
                 data,
                 dialogAddFun,
-                close
+                close            
             }
         }
     }
@@ -142,3 +190,10 @@
 <style lang="scss" scoped>
     
 </style>
+<!--
+    1、父组件拿到子组件数据：通过 :tableRow.sync="data.configTable.tableRow"属性方式传递子组件;
+       子组件通过emit("update:tableRow",rowData)方法向父组件传递数据;
+       在通过.sync修饰符更新父组件tableRow数据
+
+    2、父组件调子组件中的方法  ref="refreshFun"  通过 refs.refreshFun.queryTable()获取子组件中的方法
+-->
