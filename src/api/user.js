@@ -21,3 +21,12 @@ export function setDelete(data = {}) {
         data: data
     });
 }
+
+export function activeSwitch(data) {
+    return sevice.request({
+        url: '/user/actives/',
+        method: 'post',
+        data: data
+    })
+
+}

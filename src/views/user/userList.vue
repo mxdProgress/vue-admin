@@ -25,13 +25,13 @@
              </el-col>
         </el-row>
         <div class="" style="height:30px;"></div>
-        <table-vue ref="refreshFun" :config="data.configTable" :tableRow.sync="data.tableRow">
+        <table-vue ref="refreshFun" :config="data.configTable" :tableRow.sync="data.tableRow" >
             <template v-slot:status="slotsData">
-                <el-switch v-model="slotsData.data.status" active-value="2" inactive-value="1" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
+                <el-switch v-model="slotsData.data.status" @change="handleSwitch(slotsData.data)" active-value="2" inactive-value="1" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
                 <!-- {{slotsData.data.status}} -->
             </template>
             <template v-slot:operation="slotsData">
-                 <el-button type="danger"  size="mini" @click="handledel(slotsData.data)">删除</el-button>
+                 <el-button type="danger" size="mini" @click="handledel(slotsData.data)">删除</el-button>
                  <!-- <el-button type="primary"  size="mini">编辑</el-button> -->
             </template>
             <template v-slot:footerDeleteAllBtn>
@@ -39,7 +39,7 @@
             </template>
         </table-vue>
         <div class="heightDiv" ></div>
-        <dialogAdd :flag.sync="data.dialog_info" :addOredit="data.addOredit" :editDatas="data.editDataItem" @close="close"/>
+        <dialogAdd :flag.sync="data.dialog_info" :addOredit="data.addOredit" :editDatas="data.editDataItem" @close="close" @refreshTableData="refreshTableData"/>
       
     </div>
 
@@ -50,7 +50,7 @@
     import elSelects from "@/components/Select/index"
     import tableVue from "@/components/Table/index"
     import dialogAdd from "./add"
-    import {setDelete } from "@/api/user"
+    import {setDelete , activeSwitch} from "@/api/user"
     export default {
         name: 'uesrManage',
         components:{
@@ -155,11 +155,29 @@
             //删除回调
            const confirmHandle = () => {
                setDelete({id:data.tableRow.rowId}).then(res=>{
-                    refs.refreshFun.queryTable()
+                    refreshTableData()
                }).catch(err=>{
                    console.log(err)
                })
            }
+
+           //刷新table
+           const refreshTableData=()=>{
+               refs.refreshFun.queryTable()
+           }
+
+            //switch开关切换
+             const handleSwitch=(val)=>{
+                activeSwitch({id:val.id,status:val.status}).then(res=>{
+
+                    root.$message({
+                        type:'success',
+                        message:res.data.message
+                    })
+                })
+             }
+
+
 
             //删除按钮
            const handledel = (params) => {
@@ -182,7 +200,9 @@
                 handerDeleAll,
                 data,
                 dialogAddFun,
-                close            
+                close   ,
+                refreshTableData,
+                handleSwitch         
             }
         }
     }

@@ -20,7 +20,7 @@
                 </el-select>
             </el-col>
             <el-col :span="6" v-if="init.street">
-                <el-select v-model="data.streetValue" placeholder="请选择"@change="handleStreet">
+                <el-select v-model="data.streetValue" placeholder="请选择" @change="handleStreet">
                     <el-option v-for="item in data.streetData" :key="item.STREET_CODE" :value="item.STREET_CODE" :label="item.STREET_NAME">
                     </el-option>
                 </el-select>
